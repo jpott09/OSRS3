@@ -1,0 +1,25 @@
+{
+    "discord":{
+        "bot token": "your bot token here",
+        "voting channel id": -1,
+        "leaderboard channel id": -1,
+        "set name channel id": -1,
+        "console channel id": -1,
+        "admin list":["an_admin_name","another_admin_name"]
+    },
+    "event":{
+        "vote open day": "sunday",
+        "vote open time": "18:00",
+        "vote close day": "monday",
+        "vote close time": "18:00",
+        "tracking start day": "monday",
+        "tracking start time": "18:15",
+        "tracking end day": "tuesday",
+        "tracking end time": "18:00"
+    },
+    "api":{
+        "url": "https://api.wiseoldman.net/v2",
+        "discord contact name": "your_discord_contact_name",
+        "bulk update frequency": 30
+    }
+}
