@@ -1,0 +1,233 @@
+[
+    {
+        "name": "Scurrius",
+        "api_name": "scurrius",
+        "level": 200,
+        "location": "Varrock Sewers",
+        "image": "290px-Scurrius.webp"
+    },
+    {
+        "name": "Giant Mole",
+        "api_name": "giant_mole",
+        "level": 230,
+        "location": "Falador Park",
+        "image": "300px-Giant_Mole.webp"
+    },
+    {
+        "name": "Deranged Archaeologist",
+        "api_name": "deranged_archaeologist",
+        "level": 276,
+        "location": "Tar Swamp",
+        "image": "101px-Deranged_archaeologist.webp"
+    },
+    {
+        "name": "Dagannoth Supreme",
+        "api_name": "dagannoth_supreme",
+        "level": 303,
+        "location": "Waterbirth Island",
+        "image": "217px-Dagannoth_Supreme.webp"
+    },
+    {
+        "name": "Dagannoth Rex",
+        "api_name": "dagannoth_rex",
+        "level": 303,
+        "location": "Waterbirth Island",
+        "image": "262px-Dagannoth_Rex.webp"
+    },
+    {
+        "name": "Dagannoth Prime",
+        "api_name": "dagannoth_prime",
+        "level": 303,
+        "location": "Waterbirth Island",
+        "image": "209px-Dagannoth_Prime.webp"
+    },
+    {
+        "name": "Sarachnis",
+        "api_name": "sarachnis",
+        "level": 318,
+        "location": "Forthos",
+        "image": "300px-Sarachnis.webp"
+    },
+    {
+        "name": "Kalphite Queen",
+        "api_name": "kalphite_queen",
+        "level": 333,
+        "location": "Kalphite Lair",
+        "image": "300px-Kalphite_Queen.webp"
+    },
+    {
+        "name": "Kree'arra",
+        "api_name": "kreearra",
+        "level": 580,
+        "location": "God Wars",
+        "image": "282px-Kree'arra.webp"
+    },
+    {
+        "name": "Commander Zilyana",
+        "api_name": "commander_zilyana",
+        "level": 596,
+        "location": "God Wars",
+        "image": "177px-Commander_Zilyana.webp"
+    },
+    {
+        "name": "General Graardor",
+        "api_name": "general_graardor",
+        "level": 624,
+        "location": "God Wars",
+        "image": "250px-General_Graardor.webp"
+    },
+    {
+        "name": "K'ril Tsutsaroth",
+        "api_name": "kril_tsutsaroth",
+        "level": 650,
+        "location": "God Wars",
+        "image": "275px-K'ril_Tsutsaroth.webp"
+    },
+    {
+        "name": "Corporeal Beast",
+        "api_name": "corporeal_beast",
+        "level": 785,
+        "location": "Corporeal Beast's Lair",
+        "image": "300px-Corporeal_Beast.webp"
+    },
+    {
+        "name": "Nex",
+        "api_name": "nex",
+        "level": 1001,
+        "location": "God Wars",
+        "image": "258px-Nex.webp"
+    },
+    {
+        "name": "Chaos Fanatic",
+        "api_name": "chaos_fanatic",
+        "level": 202,
+        "location": "West of Lava Maze",
+        "image": "85px-Chaos_Fanatic.webp"
+    },
+    {
+        "name": "Crazy Archaeologist",
+        "api_name": "crazy_archaeologist",
+        "level": 204,
+        "location": "Dareeyak Ruins",
+        "image": "50px-Crazy_archaeologist.webp"
+    },
+    {
+        "name": "Scorpia",
+        "api_name": "scorpia",
+        "level": 225,
+        "location": "Scorpion Pit",
+        "image": "150px-Scorpia.webp"
+    },
+    {
+        "name": "King Black Dragon",
+        "api_name": "king_black_dragon",
+        "level": 276,
+        "location": "King Black Dragon Lair",
+        "image": "150px-King_Black_Dragon.webp"
+    },
+    {
+        "name": "Chaos Elemental",
+        "api_name": "chaos_elemental",
+        "level": 305,
+        "location": "West of the Rogues Castle",
+        "image": "150px-Chaos_Elemental.webp"
+    },
+    {
+        "name": "Calvar'ion",
+        "api_name": "calvarion",
+        "level": 264,
+        "location": "Skeletal Tomb",
+        "image": "82px-Calvar'ion.webp"
+    },
+    {
+        "name": "Vet'ion",
+        "api_name": "vetion",
+        "level": 454,
+        "location": "Vet'ion's Rest",
+        "image": "82px-Calvar'ion.webp"
+    },
+    {
+        "name": "Spindel",
+        "api_name": "spindel",
+        "level": 302,
+        "location": "Web Chasm",
+        "image": "150px-Spindel.webp"
+    },
+    {
+        "name": "Venenatis",
+        "api_name": "venenatis",
+        "level": 464,
+        "location": "Silk Chasm",
+        "image": "150px-Spindel.webp"
+    },
+    {
+        "name": "Artio",
+        "api_name": "artio",
+        "level": 450,
+        "location": "Hunter's End",
+        "image": "150px-Artio.webp"
+    },
+    {
+        "name": "Callisto",
+        "api_name": "callisto",
+        "level": 1000,
+        "location": "Callisto's Den",
+        "image": "150px-Artio.webp"
+    },
+    { 
+        "name": "Zulrah", 
+        "api_name": "zulrah",
+        "level": 725, 
+        "location": "Zul-Andra", 
+        "image": "140px-Zulrah_(serpentine).webp" 
+    },
+    {
+        "name": "Vorkath",
+        "api_name": "vorkath",
+        "level": 732,
+        "location": "Ungael",
+        "image": "190px-Vorkath.webp"
+    },
+    {
+        "name": "Phantom Muspah",
+        "api_name": "phantom_muspah",
+        "level": 741,
+        "location": "Ghorrock Dungeon",
+        "image": "149px-Phantom_Muspah_(ranged).webp"
+    },
+    {
+        "name": "The Nightmare",
+        "api_name": "nightmare",
+        "level": 814,
+        "location": "Sisterhood Sanctuary",
+        "image": "150px-The_Nightmare.webp"
+    },
+    {
+        "name": "Phosani's Nightmare",
+        "api_name": "phosanis_nightmare",
+        "level": 1024,
+        "location": "Sisterhood Sanctuary",
+        "image": "150px-The_Nightmare.webp"
+    },
+    {
+        "name": "Tempoross",
+        "api_name": "tempoross",
+        "level": -1,
+        "location": "Ruins of Unkah",
+        "image": "150px-Tempoross.webp"
+    },
+    {
+        "name": "Wintertodt",
+        "api_name": "wintertodt",
+        "level": -1,
+        "location": "Wintertodt Camp",
+        "image": "150px-Howling_Snow_Storm.jpg"
+    },
+    {
+        "name": "Zalcano",
+        "api_name": "zalcano",
+        "level": -1,
+        "location": "Prifddinas",
+        "image": "89px-Zalcano.webp"
+    }
+]

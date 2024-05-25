@@ -15,6 +15,7 @@ from modules.objects.player import Player
 from modules.state.session import Session
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from modules.state.event_state import EventState
+from services.async_timer import AsyncTimer
 
 class DiscordHandler(Logger):
     def __init__(self,config_handler:ConfigHandler,state_hanlder:StateHandler):
@@ -40,7 +41,8 @@ class DiscordHandler(Logger):
         self.scheduler.add_job(self.close_voting_logic, 'cron', day_of_week=event_schedule.vote_close_day, hour=event_schedule.vote_close_hour, minute=event_schedule.vote_close_minute)
         self.scheduler.add_job(self.open_tracking_logic, 'cron', day_of_week=event_schedule.tracking_start_day, hour=event_schedule.tracking_start_hour, minute=event_schedule.tracking_start_minute)
         self.scheduler.add_job(self.close_tracking_logic, 'cron', day_of_week=event_schedule.tracking_stop_day, hour=event_schedule.tracking_stop_hour, minute=event_schedule.tracking_stop_minute)
-
+        # scheduled updates for active tracking handler
+        self.update_timer:AsyncTimer = None
         # events
         @self.bot.event
         async def on_ready():
@@ -487,15 +489,33 @@ class DiscordHandler(Logger):
                 return
         await self.dlog(f"Successfully started tracking for {current_session.current_boss.name} | {current_session.current_boss.level} | {current_session.current_boss.location}")
         #update leaderboard during active tracking session
-        await self.update_leaderboard()
+        #start periodic updates
+        await self.start_periodic_updates()
 
     async def close_tracking_logic(self):
+        #stop periodic updates
+        await self.stop_periodic_updates()
+        #update leaderboard
+        await self.dlog("Updating leaderboard for final results before closing tracking...")
+        await self.update_leaderboard()
+        await self.dlog("Final leaderboard update complete. Closing tracking...")
         if not self.__state_handler.close_tracking():
             await self.dlog("Error stopping tracking")
         else:
             await self.dlog("Successfully stopped tracking")
-            #update leaderboard
-            await self.update_leaderboard()
+
+    async def start_periodic_updates(self):
+        """This will be called by open_tracking_logic to start the periodic updates for the current boss."""
+        update_interval:int = self.__config_handler.api_state.update_frequency * 60
+        self.update_timer = AsyncTimer(update_interval,self.update_leaderboard)
+        self.dlog(f"Periodic updates should now be running for the active tracking session every {self.__config_handler.api_state.update_frequency} minutes.")
+
+
+    async def stop_periodic_updates(self):
+        """This will be called by close_tracking_logic to stop the periodic updates for the current boss."""
+        self.update_timer.stop()
+        self.update_timer = None
+        self.dlog("Periodic updates have been stopped.")
     # end logic functions -----------------------------------------
 
     # discord functions -----------------------------------------

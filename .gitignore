@@ -1,4 +1,5 @@
 config.json
-data/
+data/player_data.json
+data/session_data.json
 assets/combined_image.png
 __pycache__
