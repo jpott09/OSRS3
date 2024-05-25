@@ -63,7 +63,7 @@ class PlayerParser(Logger):
         if not boss:
             self.warn(self,"No boss to convert to JSON",self.__player_boss_to_json)
             return {}
-        self.log(self,f"Converting boss {boss.name} to JSON",self.__player_boss_to_json)
+        #self.log(self,f"Converting boss {boss.name} to JSON",self.__player_boss_to_json)
         return {
             "name":boss.name,
             "kills":boss.kills,
@@ -76,7 +76,7 @@ class PlayerParser(Logger):
         if not boss_data:
             self.warn(self,"No boss data to convert to object",self.__player_boss_json_to_object)
             return None
-        self.log(self,f"Converting boss data to object",self.__player_boss_json_to_object)
+        #self.log(self,f"Converting boss data to object",self.__player_boss_json_to_object)
         boss:Boss = Boss(boss_data["name"],boss_data["kills"])
         boss.tracked_kills = boss_data["tracked_kills"]
         boss.kill_offset = boss_data["kill_offset"]
@@ -128,7 +128,7 @@ class LocalBossParser(Logger):
         if not boss:
             self.warn(self,"No boss to convert to JSON",self.local_boss_to_json)
             return None
-        self.log(self,f"Converting boss {boss.name} to JSON",self.local_boss_to_json)
+        #self.log(self,f"Converting boss {boss.name} to JSON",self.local_boss_to_json)
         return {
             "name":boss.name,
             "api_name":boss.api_name,
@@ -142,7 +142,7 @@ class LocalBossParser(Logger):
         if not boss_data:
             self.warn(self,"No boss data to convert to object",self.local_boss_json_to_object)
             return None
-        self.log(self,f"Converting boss data to object",self.local_boss_json_to_object)
+        #self.log(self,f"Converting boss data to object",self.local_boss_json_to_object)
         return LocalBoss(boss_data["name"],boss_data["api_name"],boss_data["level"],boss_data["location"],boss_data["image"])
     
 class SessionParser(Logger):

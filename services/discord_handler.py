@@ -34,7 +34,6 @@ class DiscordHandler(Logger):
         self.__vote_handler:VoteHandler = None #vote handler will be created when needed, and deleted when not in use
         self.__valid_emojis:list[str] = ['🇦', '🇧', '🇨', '🇩']
         # scheduled events -------------------------------------
-        # TODO: Implement scheduled events
         event_schedule:EventState = self.__config_handler.get_event_state()
         self.scheduler:AsyncIOScheduler = AsyncIOScheduler()
         self.scheduler.add_job(self.open_voting_logic, 'cron', day_of_week=event_schedule.vote_open_day, hour=event_schedule.vote_open_hour, minute=event_schedule.vote_open_minute)
@@ -387,7 +386,6 @@ class DiscordHandler(Logger):
                     message += f"\t{player.discord_name} | {player.osrs_name}\n"
             await self.dlog(message)
 
-        # TODO: ensure this is working to start both scheduler and discord bot
     async def run(self):
         self.scheduler.start()
         await self.bot.start(self.__config_handler.get_discord_state().bot_token)
@@ -508,14 +506,13 @@ class DiscordHandler(Logger):
         """This will be called by open_tracking_logic to start the periodic updates for the current boss."""
         update_interval:int = self.__config_handler.api_state.update_frequency * 60
         self.update_timer = AsyncTimer(update_interval,self.update_leaderboard)
-        self.dlog(f"Periodic updates should now be running for the active tracking session every {self.__config_handler.api_state.update_frequency} minutes.")
-
+        await self.dlog(f"Periodic updates should now be running for the active tracking session every {self.__config_handler.api_state.update_frequency} minutes.")
 
     async def stop_periodic_updates(self):
         """This will be called by close_tracking_logic to stop the periodic updates for the current boss."""
         self.update_timer.stop()
         self.update_timer = None
-        self.dlog("Periodic updates have been stopped.")
+        await self.dlog("Periodic updates have been stopped.")
     # end logic functions -----------------------------------------
 
     # discord functions -----------------------------------------
@@ -611,12 +608,14 @@ class DiscordHandler(Logger):
         await self.send_message(channel_id,"Players updated.  Generating leaderboard...")
         #create message
         message:str = "<discord name> | <osrs name> | <kills> | <tracked kills>\n"
+        # TODO: Sort players by tracked kills
         for player in players:
             active_boss:Boss = None
             for boss in player.boss_list:
                 if boss.name == boss_to_show.api_name:
                     active_boss = boss
                     break
+            # TODO : consistent formatting for message spacing (beautify)
             if active_boss:
                 message += f"{player.discord_name} | {player.osrs_name} | {active_boss.kills} | {active_boss.tracked_kills}\n"
             else:
