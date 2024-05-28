@@ -576,7 +576,7 @@ class DiscordHandler(Logger):
             return True
         return False
     
-    async def update_leaderboard(self):
+    async def update_leaderboard(self,update_players:bool=True):
         """Update the leaderboard channel with updated api player data, and an embed of relevant data."""
         session:Session = self.__state_handler.get_current_session()
         channel_id:int = self.__config_handler.get_discord_state().leaderboard_channel_id
@@ -603,23 +603,40 @@ class DiscordHandler(Logger):
         title:str = "Tracking is Active" if tracking_status else "Tracking is Inactive"
         title += f"\n{boss_title} {boss_to_show.name} | {boss_to_show.level} | {boss_to_show.location}" if boss_to_show else "No Current Boss"
         #update players from api
-        await self.send_message(channel_id,"Updating all players...")
-        await self.__player_handler.update_all_players(not tracking_status)
-        await self.send_message(channel_id,"Players updated.  Generating leaderboard...")
-        #create message
-        message:str = "<discord name> | <osrs name> | <kills> | <tracked kills>\n"
-        # TODO: Sort players by tracked kills
+        if update_players:
+            await self.send_message(channel_id,"Updating all players...")
+            await self.__player_handler.update_all_players(not tracking_status)
+            await self.send_message(channel_id,"Players updated.  Generating leaderboard...")
+        #create message lines
+        data_lines:list[dict] = []
+        #grab data from players and put it in data_lines to be sorted by kills before displaying
         for player in players:
             active_boss:Boss = None
             for boss in player.boss_list:
                 if boss.name == boss_to_show.api_name:
                     active_boss = boss
                     break
-            # TODO : consistent formatting for message spacing (beautify)
             if active_boss:
-                message += f"{player.discord_name} | {player.osrs_name} | {active_boss.kills} | {active_boss.tracked_kills}\n"
+                data:dict = {
+                    "discord_name":player.discord_name,
+                    "osrs_name":player.osrs_name,
+                    "tracked_kills":active_boss.tracked_kills,
+                    "kills":active_boss.kills
+                }
+                data_lines.append(data)
             else:
                 self.dlog(f"Error updating leaderboard: player {player.osrs_name} does not have boss {boss_to_show.api_name}")
+        #sort data lines and create messsage
+        message:str = "Leaderboard:\n"
+        if data_lines:
+            data_lines.sort(key=lambda x: x["tracked_kills"],reverse=True)
+            for data in data_lines:
+                kills:str = str(data["tracked_kills"])
+                while kills.count() < 2:
+                    kills = "0" + kills
+                message += f"Kills: {kills} -- {data['discord_name']} | {data['osrs_name']}"
+        else:
+            message += "No data to display"
         #clear channel
         await self.clear_messages(channel_id)
         #send message
