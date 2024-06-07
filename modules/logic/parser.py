@@ -321,7 +321,8 @@ class ApiParser(Logger):
         return ApiState(
             url = api_data["url"],
             discord_contact_name = api_data["discord contact name"],
-            update_frequency = api_data["bulk update frequency"]
+            bulk_update_frequency_minutes = api_data["bulk update frequency minutes"],
+            update_ratelimit_seconds = api_data["update ratelimit seconds"]
         )
     
     def api_to_json(self,api_state:ApiState) -> dict:

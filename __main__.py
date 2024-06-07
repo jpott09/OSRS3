@@ -1,7 +1,7 @@
 from services.config_handler import ConfigHandler
 from services.discord_handler import DiscordHandler
 from modules.objects.paths import Paths
-from services.state_handler import StateHandler
+from services.session_handler import StateHandler
 import os
 import asyncio
 

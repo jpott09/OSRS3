@@ -158,13 +158,21 @@ class ConfigHandler(Logger):
         if not name_valid:
             self.error(self,"Invalid provided in config file for api['discord_contact_name'].",self._check_api_state)
             return False
-        # check update_frequency
-        frequency:int = api_state.update_frequency
+        # check bulk update frequency
+        bulk_update_frequency:int = api_state.bulk_update_frequency_minutes
         frequency_valid:bool = True
-        if not frequency: frequency_valid = False
-        if not self._is_int(frequency): frequency_valid = False
+        if not bulk_update_frequency: frequency_valid = False
+        if not self._is_int(bulk_update_frequency): frequency_valid = False
         if not frequency_valid:
             self.error(self,"Invalid provided in config file for api['update_frequency'].",self._check_api_state)
+            return False
+        # check update ratelimit
+        update_ratelimit:int = api_state.update_ratelimit_seconds
+        ratelimit_valid:bool = True
+        if not update_ratelimit: ratelimit_valid = False
+        if not self._is_int(update_ratelimit): ratelimit_valid = False
+        if not ratelimit_valid:
+            self.error(self,"Invalid provided in config file for api['update_ratelimit'].",self._check_api_state)
             return False
         self.log(self,"api_state object is valid.",self._check_api_state)
         return True

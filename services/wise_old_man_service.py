@@ -22,7 +22,10 @@ class WiseOldManService(Logger):
     def __can_query(self) -> bool:
         """Checks if the service can query the WiseOldMan API.  The API has a rate limit of 1 query per 5 seconds. Returns True or False"""
         if self.last_query is None: return True
-        return (datetime.now() - self.last_query).seconds >= self.api_state.update_frequency
+        #TODO : Implement new API field in config.json to separate update frequency from bulk update frequency
+        # (i.e. update frequency is for time between requests, bulk update frequency is time between major update for all players)
+        # Because this is fucking me
+        return (datetime.now() - self.last_query).seconds >= self.api_state.update_ratelimit_seconds
     
     async def update_player(self,username:str) -> WiseOldManPlayerData:
         """This method is used to update the player data for the specified username.  This function is rate limited. Returns None if the player data could not be fetched."""

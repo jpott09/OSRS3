@@ -15,7 +15,7 @@ class SessionChanger(Logger):
         self.__close_tracking_session:str = "Close Tracking"
 
     def open_voting(self,session:Session,boss_list:list[LocalBoss]) -> bool:
-        """Opens voting for the session.  Generates 4 random bosses for the boss pool. Returns True if successful, False otherwise"""
+        """Opens voting for the session.  Generates 4 random bosses for the boss pool. Resets used_boss list if they have all been used. Returns True if successful, False otherwise"""
         if not session:
             self.warn(self,"No session to open voting",self.open_voting)
             return False

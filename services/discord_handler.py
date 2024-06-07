@@ -6,7 +6,7 @@ from base.logging import Logger
 from services.config_handler import ConfigHandler
 from services.boss_handler import BossHandler
 from services.player_handler import PlayerHandler
-from services.state_handler import StateHandler
+from services.session_handler import StateHandler
 from services.vote_handler import VoteHandler
 from modules.objects.boss import LocalBoss, Boss
 from modules.dtos.boss_emoji_data import BossEmoji
@@ -30,7 +30,7 @@ class DiscordHandler(Logger):
         self.__config_handler:ConfigHandler = config_handler
         self.__boss_handler:BossHandler = BossHandler(config_handler.paths.filepath_boss_data)
         self.__player_handler:PlayerHandler = PlayerHandler(config_handler.paths.filepath_player_data,self.__config_handler.api_state)
-        self.__state_handler:StateHandler = state_hanlder
+        self.__session_handler:StateHandler = state_hanlder
         self.__vote_handler:VoteHandler = None #vote handler will be created when needed, and deleted when not in use
         self.__valid_emojis:list[str] = ['🇦', '🇧', '🇨', '🇩']
         # scheduled events -------------------------------------
@@ -46,6 +46,14 @@ class DiscordHandler(Logger):
         @self.bot.event
         async def on_ready():
             await self.dlog(f"Bot is ready.  Logged in as {self.bot.user.name}")
+            #if tracking is active, start the periodic updates
+            if self.__session_handler.get_current_session().tracking_active:
+                await self.dlog("Bot was (re)started during tracking active phase. Starting periodic updates...")
+                await self.start_periodic_updates()
+            #if voting is active, restart the voting phase
+            if self.__session_handler.get_current_session().voting_active:
+                await self.dlog("Bot was (re)started during voting active phase. Restarting voting phase...")
+                await self.open_voting_logic()
 
         @self.bot.event
         async def on_reaction_add(reaction:discord.Reaction,user:discord.User):
@@ -53,7 +61,7 @@ class DiscordHandler(Logger):
             # if not in a voting session, ignore
             if user.bot: return
             if not self.check_channel(self.__config_handler.get_discord_state().voting_channel_id,reaction.message.channel.id): return
-            if not self.__state_handler.get_current_session().voting_active: return
+            if not self.__session_handler.get_current_session().voting_active: return
             if not self.__vote_handler:
                 self.dlog(f"Error: vote handler not set but voting is open.  Ignoring reaction.")
                 return
@@ -76,7 +84,7 @@ class DiscordHandler(Logger):
             # if not in a voting session, ignore
             if user.bot: return
             if not self.check_channel(self.__config_handler.get_discord_state().voting_channel_id,reaction.message.channel.id): return
-            if not self.__state_handler.get_current_session().voting_active: return
+            if not self.__session_handler.get_current_session().voting_active: return
             if not self.__vote_handler:
                 self.dlog(f"Error: vote handler not set but voting is open.  Ignoring reaction.")
                 return
@@ -200,7 +208,7 @@ class DiscordHandler(Logger):
             if ctx.author.bot: return
             if not self.__is_admin(ctx.author.name): return
             if not self.check_channel(self.__config_handler.get_discord_state().console_channel_id,ctx.channel.id): return
-            if self.__state_handler.reset_session():
+            if self.__session_handler.reset_session():
                 await self.update_leaderboard()
                 await self.dlog("Successfully set session to 'no session'")
             else:
@@ -229,7 +237,7 @@ class DiscordHandler(Logger):
             if ctx.author.bot: return
             if not self.__is_admin(ctx.author.name): return
             if not self.check_channel(self.__config_handler.get_discord_state().console_channel_id,ctx.channel.id): return
-            session:Session = self.__state_handler.get_current_session()
+            session:Session = self.__session_handler.get_current_session()
             message:str = f"Session Status:\n"
             if session.voting_active: 
                 message += f"Voting Active\n"
@@ -276,7 +284,7 @@ class DiscordHandler(Logger):
             if ctx.author.bot: return
             if not self.__is_admin(ctx.author.name): return
             if not self.check_channel(self.__config_handler.get_discord_state().console_channel_id,ctx.channel.id): return
-            session:Session = self.__state_handler.get_current_session()
+            session:Session = self.__session_handler.get_current_session()
             message:str = f"Session Details:\n"
             message += f"Tracking Active: {session.tracking_active}\n"
             message += f"Voting Active: {session.voting_active}\n"
@@ -356,7 +364,7 @@ class DiscordHandler(Logger):
                 await self.dlog(f"Error updating player: player {check_name_str} does not exist")
                 return
             await self.dlog(f"Updating player {check_name_str}. this may take a moment depending on rate limits and last update time...")
-            if not await self.__player_handler.update_player(player.osrs_name,not self.__state_handler.get_current_session().tracking_active):
+            if not await self.__player_handler.update_player(player.osrs_name,not self.__session_handler.get_current_session().tracking_active):
                 await self.dlog(f"Error updating player: player {check_name_str} does not exist")
                 return
             await self.dlog(f"Successfully updated player {check_name_str}")
@@ -386,6 +394,16 @@ class DiscordHandler(Logger):
                     message += f"\t{player.discord_name} | {player.osrs_name}\n"
             await self.dlog(message)
 
+        @self.bot.command(help="Clear previously used bosses (allow them to be used again).")
+        async def clear_used_bosses(ctx:commands.Context):
+            if ctx.author.bot: return
+            if not self.__is_admin(ctx.author.name): return
+            if not self.check_channel(self.__config_handler.get_discord_state().console_channel_id,ctx.channel.id): return
+            if self.__session_handler.clear_used_bosses():
+                await self.dlog("Cleared used bosses")
+            else:
+                await self.dlog("Error clearing used bosses")
+
     async def run(self):
         self.scheduler.start()
         await self.bot.start(self.__config_handler.get_discord_state().bot_token)
@@ -394,16 +412,16 @@ class DiscordHandler(Logger):
     # logic functions for open/close voting, and open/close tracking.  to be used with both commands and scheduler: ----------------
     async def open_voting_logic(self):
         # check if voting is already open
-        if self.__state_handler.get_current_session().voting_active:
+        if self.__session_handler.get_current_session().voting_active:
             await self.dlog("Error opening voting: voting is already open")
             return
         # set session to open voting
-        if self.__state_handler.open_voting(self.__boss_handler.get_bosses()):
+        if self.__session_handler.open_voting(self.__boss_handler.get_bosses()):
             await self.dlog("Successfully set session to voting. generating message...")
         else:
             await self.dlog("Error opening voting")
         # get the boss pool for this vote
-        boss_pool:list[LocalBoss] = self.__state_handler.get_current_session().boss_pool
+        boss_pool:list[LocalBoss] = self.__session_handler.get_current_session().boss_pool
         #check we have 4 reactions and 4 bosses in the pool
         if len(boss_pool) != 4 or len(self.__valid_emojis) != 4:
             await self.dlog("Error opening voting: boss pool or emojis not set correctly")
@@ -441,15 +459,15 @@ class DiscordHandler(Logger):
 
     async def close_voting_logic(self):
         # check if voting is open
-        if not self.__state_handler.get_current_session().voting_active:
+        if not self.__session_handler.get_current_session().voting_active:
             await self.dlog("Error closing voting: voting is not open")
             return
         # tally the votes
-        winning_boss:LocalBoss = self.__vote_handler.tally_votes() if self.__vote_handler and self.__vote_handler.tally_votes() else self.__state_handler.get_current_session().boss_pool[0]
+        winning_boss:LocalBoss = self.__vote_handler.tally_votes() if self.__vote_handler and self.__vote_handler.tally_votes() else self.__session_handler.get_current_session().boss_pool[0]
         
         # clear the voting channel
         await self.clear_messages(self.__config_handler.get_discord_state().voting_channel_id)
-        if self.__state_handler.close_voting(winning_boss):
+        if self.__session_handler.close_voting(winning_boss):
             await self.dlog("Successfully closed voting.  Generating message...")
         else:
             await self.dlog("Error closing voting")
@@ -466,7 +484,7 @@ class DiscordHandler(Logger):
     
     async def open_tracking_logic(self):
         # check if we have everything to start tracking
-        current_session:Session = self.__state_handler.get_current_session()
+        current_session:Session = self.__session_handler.get_current_session()
         if current_session.tracking_active:
             await self.dlog("Error starting tracking: tracking is already active")
             return
@@ -476,10 +494,10 @@ class DiscordHandler(Logger):
         #update leaderboard
         await self.dlog(f"Updating player baseline data...")
         await self.update_leaderboard()
-        if not self.__state_handler.open_tracking(self.__state_handler.get_current_session().current_boss):
+        if not self.__session_handler.open_tracking(self.__session_handler.get_current_session().current_boss):
             await self.dlog(f"Could not open tracking with session data.  attempting to use vote handler data...")
             if self.__vote_handler and self.__vote_handler.selected_boss:
-                if not self.__state_handler.open_tracking(self.__vote_handler.selected_boss):
+                if not self.__session_handler.open_tracking(self.__vote_handler.selected_boss):
                     await self.dlog("Error starting tracking")
                     return
             else:
@@ -487,6 +505,7 @@ class DiscordHandler(Logger):
                 return
         await self.dlog(f"Successfully started tracking for {current_session.current_boss.name} | {current_session.current_boss.level} | {current_session.current_boss.location}")
         #update leaderboard during active tracking session
+        await self.update_leaderboard()
         #start periodic updates
         await self.start_periodic_updates()
 
@@ -497,16 +516,18 @@ class DiscordHandler(Logger):
         await self.dlog("Updating leaderboard for final results before closing tracking...")
         await self.update_leaderboard()
         await self.dlog("Final leaderboard update complete. Closing tracking...")
-        if not self.__state_handler.close_tracking():
+        if not self.__session_handler.close_tracking():
             await self.dlog("Error stopping tracking")
         else:
             await self.dlog("Successfully stopped tracking")
+        # update leaderboard without resetting baseline data
+        await self.update_leaderboard(False)
 
     async def start_periodic_updates(self):
         """This will be called by open_tracking_logic to start the periodic updates for the current boss."""
-        update_interval:int = self.__config_handler.api_state.update_frequency * 60
-        self.update_timer = AsyncTimer(update_interval,self.update_leaderboard)
-        await self.dlog(f"Periodic updates should now be running for the active tracking session every {self.__config_handler.api_state.update_frequency} minutes.")
+        update_interval_seconds:int = self.__config_handler.api_state.bulk_update_frequency_minutes * 60
+        self.update_timer = AsyncTimer(update_interval_seconds,self.update_leaderboard)
+        await self.dlog(f"Periodic updates should now be running for the active tracking session every {str(self.__config_handler.api_state.bulk_update_frequency_minutes)} minutes.")
 
     async def stop_periodic_updates(self):
         """This will be called by close_tracking_logic to stop the periodic updates for the current boss."""
@@ -578,7 +599,7 @@ class DiscordHandler(Logger):
     
     async def update_leaderboard(self,update_players:bool=True):
         """Update the leaderboard channel with updated api player data, and an embed of relevant data."""
-        session:Session = self.__state_handler.get_current_session()
+        session:Session = self.__session_handler.get_current_session()
         channel_id:int = self.__config_handler.get_discord_state().leaderboard_channel_id
         players:list[Player] = self.__player_handler.get_players()
         tracking_status:bool = session.tracking_active
@@ -632,9 +653,9 @@ class DiscordHandler(Logger):
             data_lines.sort(key=lambda x: x["tracked_kills"],reverse=True)
             for data in data_lines:
                 kills:str = str(data["tracked_kills"])
-                while kills.count() < 2:
+                while len(kills) < 2:
                     kills = "0" + kills
-                message += f"Kills: {kills} -- {data['discord_name']} | {data['osrs_name']}"
+                message += f"     Kills: {kills} -- {data['discord_name']} | {data['osrs_name']}"
         else:
             message += "No data to display"
         #clear channel
