@@ -11,6 +11,8 @@ Install the following external libraries using pip module:
 - apscheduler: `pip install apscheduler`
 - colorama: `pip install colorama`
 - PIL: `pip install pillow`
+- requests: `pip install reqests`
+- discord: `pip install discord`
 
 ## Setup
 

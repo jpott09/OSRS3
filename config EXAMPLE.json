@@ -20,6 +20,7 @@
     "api":{
         "url": "https://api.wiseoldman.net/v2",
         "discord contact name": "your_discord_contact_name",
-        "bulk update frequency": 30
+        "bulk update frequency minutes": 30,
+        "update ratelimit seconds": 3
     }
 }
