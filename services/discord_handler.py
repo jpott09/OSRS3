@@ -69,6 +69,13 @@ class DiscordHandler(Logger):
             if not self.reaction_valid(reaction.emoji):
                 #remove it
                 await reaction.remove(user)
+                return
+            #check if user has already been linked to an osrs name
+            if not self.__player_handler.discord_name_exists(user.name):
+                #remove it
+                await reaction.remove(user)
+                await self.dlog(f"Error adding vote for {user.name}: user has not linked an OSRS name.")
+                return
             previous_reaction:str = self.__vote_handler.get_previous_reaction(user.name)
             if previous_reaction:
                 #remove previous reaction
@@ -77,7 +84,6 @@ class DiscordHandler(Logger):
             if not self.__vote_handler.add_vote(user.name,reaction.emoji):
                 await self.dlog(f"Error adding vote for {user.name} with emoji {reaction.emoji}")
                 return
-            #await self.dlog(f"Added vote for {user.name} with emoji {reaction.emoji}")
         
         @self.bot.event
         async def on_reaction_remove(reaction:discord.Reaction,user:discord.User):
@@ -91,11 +97,12 @@ class DiscordHandler(Logger):
                 return
             if not self.reaction_valid(reaction.emoji):
                 return
+            if not self.__player_handler.discord_name_exists(user.name):
+                return
             #remove the vote
             if not self.__vote_handler.remove_vote(user.name,reaction.emoji):
                 await self.dlog(f"Error removing vote for {user.name} with emoji {reaction.emoji}.  The vote did not exist.")
                 return
-            #await self.dlog(f"Removed vote for {user.name} with emoji {reaction.emoji}")
 
         @self.bot.event
         async def on_message(message:discord.Message):
