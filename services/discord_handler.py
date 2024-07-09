@@ -74,7 +74,7 @@ class DiscordHandler(Logger):
             if not self.__player_handler.discord_name_exists(user.name):
                 #remove it
                 await reaction.remove(user)
-                await self.dlog(f"Error adding vote for {user.name}: user has not linked an OSRS name.")
+                await self.dlog(f"Could not add vote for {user.name}: user has not been linked to an OSRS name.")
                 return
             previous_reaction:str = self.__vote_handler.get_previous_reaction(user.name)
             if previous_reaction:
