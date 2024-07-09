@@ -6,7 +6,16 @@ This document provides instructions on how to setup and run this bot application
 
 Ensure you have Python installed. This project was built using version 3.11.4.
 
-Install the following external libraries using pip module:
+Install all requirements with pip install -r requirements:
+
+- Navigate to this folder containing the README.mk and requirements.txt
+- Type 'pip install -r requirements.txt'
+
+# OR
+
+Install the following external libraries manually using pip module:
+(this will install the latest version of each library, and COULD
+cause issues, if the project is using deprecated calls in the future)
 
 - apscheduler: `pip install apscheduler`
 - colorama: `pip install colorama`

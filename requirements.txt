@@ -1,0 +1,5 @@
+apscheduler==3.10.4
+colorama==0.4.6
+pillow==9.5.0
+requests==2.31.0
+discord==2.3.2
