@@ -34,12 +34,13 @@ class DiscordHandler(Logger):
         self.__vote_handler:VoteHandler = None #vote handler will be created when needed, and deleted when not in use
         self.__valid_emojis:list[str] = ['🇦', '🇧', '🇨', '🇩']
         # scheduled events -------------------------------------
+        self.grace_seconds:int = 60
         event_schedule:EventState = self.__config_handler.get_event_state()
         self.scheduler:AsyncIOScheduler = AsyncIOScheduler()
-        self.scheduler.add_job(self.open_voting_logic, 'cron', day_of_week=event_schedule.vote_open_day, hour=event_schedule.vote_open_hour, minute=event_schedule.vote_open_minute)
-        self.scheduler.add_job(self.close_voting_logic, 'cron', day_of_week=event_schedule.vote_close_day, hour=event_schedule.vote_close_hour, minute=event_schedule.vote_close_minute)
-        self.scheduler.add_job(self.open_tracking_logic, 'cron', day_of_week=event_schedule.tracking_start_day, hour=event_schedule.tracking_start_hour, minute=event_schedule.tracking_start_minute)
-        self.scheduler.add_job(self.close_tracking_logic, 'cron', day_of_week=event_schedule.tracking_stop_day, hour=event_schedule.tracking_stop_hour, minute=event_schedule.tracking_stop_minute)
+        self.scheduler.add_job(self.open_voting_logic, 'cron', day_of_week=event_schedule.vote_open_day, hour=event_schedule.vote_open_hour, minute=event_schedule.vote_open_minute,misfire_grace_time=self.grace_seconds)
+        self.scheduler.add_job(self.close_voting_logic, 'cron', day_of_week=event_schedule.vote_close_day, hour=event_schedule.vote_close_hour, minute=event_schedule.vote_close_minute,misfire_grace_time=self.grace_seconds)
+        self.scheduler.add_job(self.open_tracking_logic, 'cron', day_of_week=event_schedule.tracking_start_day, hour=event_schedule.tracking_start_hour, minute=event_schedule.tracking_start_minute,misfire_grace_time=self.grace_seconds)
+        self.scheduler.add_job(self.close_tracking_logic, 'cron', day_of_week=event_schedule.tracking_stop_day, hour=event_schedule.tracking_stop_hour, minute=event_schedule.tracking_stop_minute,misfire_grace_time=self.grace_seconds)
         # scheduled updates for active tracking handler
         self.update_timer:AsyncTimer = None
         # events
