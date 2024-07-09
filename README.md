@@ -29,9 +29,7 @@ cause issues, if the project is using deprecated calls in the future)
 
 2. **Install the required external libraries**:
 
-    - apscheduler: Used for asynchronous scheduling, similar to cron jobs, for firing event triggers.
-    - colorama: Used for colored text output for the console.
-    - PIL: Used to combine randomly selected boss images.
+    - see above
 
 3. **Rename 'config EXAMPLE.json'** to 'config.json' in the same location (the root of the program). The program only looks for 'config.json' and will fail if this file is not present.
 
