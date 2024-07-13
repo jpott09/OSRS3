@@ -656,14 +656,14 @@ class DiscordHandler(Logger):
             else:
                 self.dlog(f"Error updating leaderboard: player {player.osrs_name} does not have boss {boss_to_show.api_name}")
         #sort data lines and create messsage
-        message:str = "Leaderboard:\n"
+        message:str = "Leaderboard:\nKills | Discord Name | OSRS Name\n"
         if data_lines:
             data_lines.sort(key=lambda x: x["tracked_kills"],reverse=True)
             for data in data_lines:
                 kills:str = str(data["tracked_kills"])
                 while len(kills) < 2:
                     kills = "0" + kills
-                message += f"     Kills: {kills} -- {data['discord_name']} | {data['osrs_name']}\n"
+                message += f"[{kills}]  |  {data['discord_name']}  |  {data['osrs_name']}\n"
         else:
             message += "No data to display"
         #clear channel
