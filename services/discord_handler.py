@@ -663,7 +663,7 @@ class DiscordHandler(Logger):
                 kills:str = str(data["tracked_kills"])
                 while len(kills) < 2:
                     kills = "0" + kills
-                message += f"     Kills: {kills} -- {data['discord_name']} | {data['osrs_name']}"
+                message += f"     Kills: {kills} -- {data['discord_name']} | {data['osrs_name']}\n"
         else:
             message += "No data to display"
         #clear channel
