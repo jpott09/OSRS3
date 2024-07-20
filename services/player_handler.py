@@ -74,6 +74,28 @@ class PlayerHandler(Logger):
             if player.discord_name == discord_name:
                 return player.osrs_name
         return ""
+    
+    async def force_update_bosses(self, osrs_name:str,update_baseline:bool=True) -> int:
+        """Force update the bosses from the API for a specific player.  Returns -1 if the player does not exist, 0 if the player data could not be fetched, 1 if the player was updated successfully."""
+        player:Player = self.__get_player_by_osrs_name(osrs_name)
+        if not player:
+            self.warn(self,f"Player {osrs_name} does not exist",self.force_update_bosses)
+            return -1
+        existing_player_bosses:list[Boss] = player.boss_list
+        self.log(self,f"Forcing update of player {osrs_name}",self.force_update_bosses)
+        wise_data:WiseOldManPlayerData = await self.__wise_old_man_service.update_player(osrs_name)
+        if not wise_data:
+            self.warn(self,f"Could not fetch player data for {osrs_name}",self.force_update_bosses)
+            return 0
+        for wise_boss in wise_data.boss_data:
+            for player_boss in existing_player_bosses:
+                if player_boss.name == wise_boss.name:
+                    continue
+            existing_player_bosses.append(Boss(wise_boss.name,wise_boss.kills))
+        player = self.__parser.combine_player_data(player,wise_data,update_baseline)
+        self.__save()
+        self.log(self,f"Updated player {osrs_name}",self.force_update_bosses)
+        return 1
 
     async def add(self,discord_name:str,osrs_name:str,local_boss_list:list[LocalBoss],update_baseline:bool=True) -> int:
         """Add a player to the player list.  Takes discord name, osrs name, and optionally a flag to update the baseline.
@@ -98,12 +120,22 @@ class PlayerHandler(Logger):
         else:
             self.log(self,f"Fetched player data for {osrs_name}",self.add)
         # create and update a player object and add it to the player list
+        # TODO NOTE! This logic was only adding bosses if they were in the local boss list.  This will be replaced, with the old code commented out.
+        """
         player_boss_list:list[Boss] = []
         for local_boss in local_boss_list:
             for wise_boss in wise_data.boss_data:
                 if local_boss.api_name == wise_boss.name:
                     player_boss_list.append(Boss(wise_boss.name, wise_boss.kills))
                     break
+        """
+        # TODO NOTE! END OF OLD CODE
+        # TODO NOTE! This is the new code that will add all bosses from the API data, regardless of the local boss list.
+        player_boss_list:list[Boss] = []
+        for wise_boss in wise_data.boss_data:
+            player_boss_list.append(Boss(wise_boss.name, wise_boss.kills))
+        # TODO NOTE! END OF NEW CODE
+        
         player:Player = Player(discord_name,osrs_name,player_boss_list)
         self.__players.append(self.__parser.combine_player_data(player,wise_data,update_baseline))
         saved:bool = self.__save()  # save player data

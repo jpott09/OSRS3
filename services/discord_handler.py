@@ -64,7 +64,7 @@ class DiscordHandler(Logger):
             if not self.check_channel(self.__config_handler.get_discord_state().voting_channel_id,reaction.message.channel.id): return
             if not self.__session_handler.get_current_session().voting_active: return
             if not self.__vote_handler:
-                self.dlog(f"Error: vote handler not set but voting is open.  Ignoring reaction.")
+                await self.dlog(f"Error: vote handler not set but voting is open.  Ignoring reaction.")
                 return
             if not self.reaction_valid(reaction.emoji):
                 #remove it
@@ -93,7 +93,7 @@ class DiscordHandler(Logger):
             if not self.check_channel(self.__config_handler.get_discord_state().voting_channel_id,reaction.message.channel.id): return
             if not self.__session_handler.get_current_session().voting_active: return
             if not self.__vote_handler:
-                self.dlog(f"Error: vote handler not set but voting is open.  Ignoring reaction.")
+                await self.dlog(f"Error: vote handler not set but voting is open.  Ignoring reaction.")
                 return
             if not self.reaction_valid(reaction.emoji):
                 return
@@ -654,7 +654,18 @@ class DiscordHandler(Logger):
                 }
                 data_lines.append(data)
             else:
-                self.dlog(f"Error updating leaderboard: player {player.osrs_name} does not have boss {boss_to_show.api_name}")
+                # TODO : Setting this to force update_baseline since the player may not have the boss in their list.  If it is added, and
+                # update baseline is false, but tracking is active, the player boss kills will show overall kills, instead of tracked kills, which should be 0.
+                retval:int = self.__player_handler.force_update_bosses(player.osrs_name,True)
+                if retval == -1:
+                    await self.dlog(f"Error updating leaderboard: player {player.osrs_name} does not exist")
+                elif retval == 0:
+                    await self.dlog(f"Eror updating leaderboard: player {player.osrs_name} data could not be fetched from the wiseoldman API")
+                elif retval == 1:
+                    await self.dlog(f"Successfully force updated boss list for player {player.osrs_name}, who was previously missing boss {boss_to_show.api_name} data")
+                    await self.dlog(f"NOTE: Player baseline has been force updated. This may affect overall kill counts.  Accurate tracking is not possible as the player did not have the boss in their list prior to this update.")
+                else:
+                    await self.dlog(f"Error updating leaderboard: player {player.osrs_name} does not have boss {boss_to_show.api_name}")
         #sort data lines and create messsage
         message:str = "Leaderboard:\nKills | Discord Name | OSRS Name\n"
         if data_lines:
