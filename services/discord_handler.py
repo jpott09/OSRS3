@@ -684,9 +684,9 @@ class DiscordHandler(Logger):
                         }
                         data_lines.append(data)
                     else:
-                        await self.dlog(f"Error updating leaderboard: player {player.osrs_name} does not have boss {boss_to_show.api_name}")
+                        await self.dlog(f"Error updating leaderboard: player {player.osrs_name} does not have boss {boss_to_show.api_name} even after attempting to force update boss list from api.")
                 else:
-                    await self.dlog(f"Error updating leaderboard: player {player.osrs_name} does not have boss {boss_to_show.api_name}")
+                    await self.dlog(f"Error updating leaderboard: player {player.osrs_name} does not have boss {boss_to_show.api_name} and force_update_bosses returned a malformed response.  Contact the developer.")
         #sort data lines and create messsage
         message:str = "Leaderboard:\nKills | Discord Name | OSRS Name\n"
         if data_lines:
