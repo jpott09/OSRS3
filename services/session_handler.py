@@ -67,5 +67,13 @@ class StateHandler(Logger):
         """Clears the used boss list.  Returns True if successful, False otherwise."""
         self.__current_session.used_boss_list.clear()
         return self.__save_current_session()
+    
+    def set_current_boss(self, boss:LocalBoss) -> bool:
+        """Sets the current boss.  Returns True if successful, False otherwise."""
+        self.__current_session.current_boss = boss
+        #check used bosses and remove the current boss from the used boss list
+        if boss in self.__current_session.used_boss_list:
+            self.__current_session.used_boss_list.remove(boss)
+        return self.__save_current_session()
 
 

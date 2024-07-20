@@ -316,7 +316,14 @@ class DiscordHandler(Logger):
             if ctx.author.bot: return
             if not self.__is_admin(ctx.author.name): return
             if not self.check_channel(self.__config_handler.get_discord_state().console_channel_id,ctx.channel.id): return
-            await self.send_message("NOT IMPLEMENTED YET. discord_handler.py")
+            user_selected_boss:str = " ".join(boss).lower()
+            local_bosses:list[LocalBoss] = self.__boss_handler.get_bosses()
+            for lb in local_bosses:
+                if lb.name.lower() == user_selected_boss:
+                    self.__session_handler.set_current_boss(lb)
+                    await self.dlog(f"Set current boss to {lb.name}")
+                    return
+            await self.dlog(f"Error setting current boss: boss '{user_selected_boss}' could not be found.  Check that it exists in local_bosses.json and is spelled correctly. Boss name is not case-sensitive.")
 
         @self.bot.command(help="!stats <osrs name:str> or !stats <discord name:str> - view player stats.")
         async def stats(ctx:commands.Context, *username:str):
@@ -664,6 +671,20 @@ class DiscordHandler(Logger):
                 elif retval == 1:
                     await self.dlog(f"Successfully force updated boss list for player {player.osrs_name}, who was previously missing boss {boss_to_show.api_name} data")
                     await self.dlog(f"NOTE: Player baseline has been force updated. This may affect overall kill counts.  Accurate tracking is not possible as the player did not have the boss in their list prior to this update.")
+                    for boss in player.boss_list:
+                        if boss.name == boss_to_show.api_name:
+                            active_boss = boss
+                            break
+                    if active_boss:
+                        data:dict = {
+                            "discord_name":player.discord_name,
+                            "osrs_name":player.osrs_name,
+                            "tracked_kills":active_boss.tracked_kills,
+                            "kills":active_boss.kills
+                        }
+                        data_lines.append(data)
+                    else:
+                        await self.dlog(f"Error updating leaderboard: player {player.osrs_name} does not have boss {boss_to_show.api_name}")
                 else:
                     await self.dlog(f"Error updating leaderboard: player {player.osrs_name} does not have boss {boss_to_show.api_name}")
         #sort data lines and create messsage
