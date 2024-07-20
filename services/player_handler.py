@@ -93,7 +93,9 @@ class PlayerHandler(Logger):
                     continue
             existing_player_bosses.append(Boss(wise_boss.name,wise_boss.kills))
         player = self.__parser.combine_player_data(player,wise_data,update_baseline)
-        self.__save()
+        saved:bool = self.__save()
+        if not saved:
+            self.error(self,"Error saving player data",self.force_update_bosses)
         self.log(self,f"Updated player {osrs_name}",self.force_update_bosses)
         return 1
 
