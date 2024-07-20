@@ -663,7 +663,7 @@ class DiscordHandler(Logger):
             else:
                 # TODO : Setting this to force update_baseline since the player may not have the boss in their list.  If it is added, and
                 # update baseline is false, but tracking is active, the player boss kills will show overall kills, instead of tracked kills, which should be 0.
-                retval:int = self.__player_handler.force_update_bosses(player.osrs_name,True)
+                retval:int = await self.__player_handler.force_update_bosses(player.osrs_name,True)
                 if retval == -1:
                     await self.dlog(f"Error updating leaderboard: player {player.osrs_name} does not exist")
                 elif retval == 0:
